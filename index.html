@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจองเวลาซ้อม</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Sarabun", Tahoma, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px 14px 40px;
+      background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+      color: #1e293b;
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: 12px auto;
+    }
+
+    .panel {
+      background: #fff;
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: 0 8px 25px rgba(0,0,0,.07);
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #15803d;
+      font-size: 27px;
+      margin: 0 0 8px;
+    }
+
+    h2 {
+      color: #166534;
+      font-size: 21px;
+      margin: 0 0 18px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #64748b;
+      font-size: 14px;
+      margin: 0 0 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 18px;
+    }
+
+    .form-group {
+      margin-bottom: 17px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid #bbf7d0;
+      border-radius: 9px;
+      font-size: 15px;
+      background: white;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: #16a34a;
+      box-shadow: 0 0 0 3px rgba(2,132,199,.12);
+    }
+
+    .required {
+      color: #dc2626;
+    }
+
+    .end-time {
+      padding: 12px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 9px;
+      color: #15803d;
+      font-weight: 700;
+      min-height: 45px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      background: #16a34a;
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    button:hover {
+      background: #15803d;
+    }
+
+    button:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 4px;
+      font-size: 17px;
+    }
+
+    .message {
+      display: none;
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 9px;
+      text-align: center;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .message.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .message.loading {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .note {
+      margin-top: 17px;
+      font-size: 12px;
+      text-align: center;
+      color: #94a3b8;
+    }
+
+    /* Calendar */
+    .calendar-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(260px, .75fr);
+      gap: 22px;
+    }
+
+    .calendar-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .calendar-head h2 {
+      margin: 0;
+      text-align: center;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 7px;
+    }
+
+    .calendar-nav button {
+      width: 39px;
+      height: 39px;
+      padding: 0;
+      font-size: 20px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .weekday {
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 0;
+    }
+
+    .day {
+      min-height: 66px;
+      border: 1px solid #d1fae5;
+      border-radius: 9px;
+      background: #fff;
+      padding: 7px 4px;
+      text-align: center;
+      cursor: pointer;
+      color: #334155;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .day:hover {
+      border-color: #4ade80;
+      background: #f0fdf4;
+    }
+
+    .day.other-month {
+      color: #bbf7d0;
+      background: #f8fafc;
+    }
+
+    .day.today {
+      border-color: #16a34a;
+    }
+
+    .day.selected {
+      background: #dcfce7;
+      border: 2px solid #16a34a;
+      padding: 6px 3px;
+    }
+
+    .day-number {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .dots {
+      display: flex;
+      gap: 3px;
+      min-height: 7px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    .dot.cancelled {
+      background: #bbf7d0;
+    }
+
+    .calendar-legend {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      background: #22c55e;
+    }
+
+    .legend-dot.cancelled {
+      background: #bbf7d0;
+    }
+
+    .selected-date {
+      color: #166534;
+      font-weight: 700;
+      margin: 0 0 12px;
+    }
+
+    .booking-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .booking-item {
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #16a34a;
+      border-radius: 9px;
+      padding: 10px 12px;
+      background: #f7fef8;
+    }
+
+    .booking-item.cancelled {
+      border-color: #d1fae5;
+      border-left-color: #94a3b8;
+      opacity: .75;
+    }
+
+    .booking-time {
+      color: #15803d;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .booking-person {
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .booking-meta {
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .empty {
+      color: #94a3b8;
+      text-align: center;
+      padding: 25px 8px;
+      font-size: 14px;
+    }
+
+    .calendar-loading {
+      color: #64748b;
+      font-size: 13px;
+      text-align: center;
+      padding: 12px;
+    }
+
+    /* Confirmation modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(15,23,42,.58);
+      padding: 18px;
+      overflow-y: auto;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 440px;
+      background: #fff;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      margin: 0 auto 12px;
+      background: #dcfce7;
+      color: #16a34a;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      font-weight: 700;
+    }
+
+    .modal h2 {
+      color: #15803d;
+      margin: 0 0 5px;
+    }
+
+    .modal-subtitle {
+      color: #64748b;
+      font-size: 13px;
+      margin: 0 0 17px;
+    }
+
+    .email-notice {
+      font-size: 12px;
+      margin: -7px 0 14px;
+      color: #15803d;
+    }
+
+    .email-notice.failed {
+      color: #b45309;
+    }
+
+    .receipt {
+      text-align: left;
+      border: 1px dashed #7dd3fc;
+      background: #f7fef8;
+      border-radius: 13px;
+      padding: 15px;
+      margin: 0 0 16px;
+    }
+
+    .receipt-title {
+      text-align: center;
+      font-size: 17px;
+      color: #15803d;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid #dcfce7;
+      font-size: 13px;
+    }
+
+    .receipt-row:last-child {
+      border-bottom: 0;
+    }
+
+    .receipt-label {
+      color: #64748b;
+      flex-shrink: 0;
+    }
+
+    .receipt-value {
+      text-align: right;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 9px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+    }
+
+    .save-btn {
+      background: #16a34a;
+    }
+
+    .save-btn:hover {
+      background: #15803d;
+    }
+
+    .close-btn {
+      background: #64748b;
+    }
+
+    .close-btn:hover {
+      background: #475569;
+    }
+
+    @media (max-width: 720px) {
+      .calendar-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 12px 9px 25px;
+      }
+
+      .panel {
+        padding: 19px 14px;
+        border-radius: 14px;
+      }
+
+      h1 {
+        font-size: 23px;
+      }
+
+      .day {
+        min-height: 53px;
+        padding: 5px 2px;
+      }
+
+      .day-number {
+        font-size: 12px;
+      }
+
+      .calendar-grid {
+        gap: 3px;
+      }
+
+      .weekday {
+        font-size: 11px;
+      }
+
+      .modal {
+        padding: 20px 15px;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+
+    <!-- ฟอร์มจอง -->
+    <section class="panel">
+      <h1>ระบบจองเวลาซ้อม</h1>
+
+      <p class="subtitle">
+        กรุณากรอกข้อมูลเพื่อทำการจองเวลาซ้อม<br>
+        ระยะเวลาการจองครั้งละ 90 นาที
+      </p>
+
+      <form id="bookingForm">
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="name">
+              ชื่อผู้จอง <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="กรอกชื่อ-นามสกุล"
+              maxlength="100"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="department">
+              ฝ่าย <span class="required">*</span>
+            </label>
+            <select id="department" name="department" required>
+              <option value="">-- กรุณาเลือกฝ่าย --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="contact">
+              ช่องทางการติดต่อกลับ <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="contact"
+              name="contact"
+              placeholder="เช่น เบอร์โทรศัพท์ หรือ LINE ID"
+              maxlength="100"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="email">
+              Email <span class="required">*</span>
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="example@email.com"
+              maxlength="150"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="date">
+              วันที่ต้องการจอง <span class="required">*</span>
+            </label>
+            <input type="date" id="date" name="date" required>
+          </div>
+
+          <div class="form-group">
+            <label for="startTime">
+              เวลาเริ่มต้น <span class="required">*</span>
+            </label>
+            <select id="startTime" name="startTime" required>
+              <option value="">-- กรุณาเลือกเวลา --</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+          <label>เวลาสิ้นสุด</label>
+          <div class="end-time" id="endTimeDisplay">
+            กรุณาเลือกเวลาเริ่มต้น
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          ยืนยันการจอง
+        </button>
+
+        <div id="message" class="message" role="status"></div>
+      </form>
+
+      <div class="note">
+        กรุณาตรวจสอบข้อมูลก่อนยืนยันการจอง
+      </div>
+    </section>
+
+    <!-- ปฏิทิน -->
+    <section class="panel">
+      <h2>ปฏิทินตารางเวลาจอง</h2>
+
+      <div class="calendar-layout">
+        <div>
+
+          <div class="calendar-head">
+            <button
+              type="button"
+              id="prevMonth"
+              class="calendar-nav"
+              aria-label="เดือนก่อน"
+            >‹</button>
+
+            <h2 id="monthTitle">กำลังโหลด...</h2>
+
+            <button
+              type="button"
+              id="nextMonth"
+              class="calendar-nav"
+              aria-label="เดือนถัดไป"
+            >›</button>
+          </div>
+
+          <div class="calendar-grid" id="calendarGrid"></div>
+
+          <div class="calendar-legend">
+            <span><i class="legend-dot"></i>มีรายการจอง</span>
+            <span><i class="legend-dot cancelled"></i>รายการยกเลิก</span>
+          </div>
+
+          <div id="calendarLoading" class="calendar-loading"></div>
+        </div>
+
+        <div>
+          <h2 style="font-size:18px">
+            รายการจองในวันที่เลือก
+          </h2>
+
+          <p class="selected-date" id="selectedDateTitle">
+            กรุณาเลือกวันที่
+          </p>
+
+          <div id="dayBookings" class="booking-list">
+            <div class="empty">กำลังโหลดข้อมูล...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Pop-up ยืนยันการจอง -->
+  <div
+    class="modal-backdrop"
+    id="successModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+  >
+    <div class="modal">
+
+      <div class="success-icon">✓</div>
+
+      <h2 id="modalTitle">จองสำเร็จ!</h2>
+
+      <p class="modal-subtitle">
+        บันทึกข้อมูลการจองเรียบร้อยแล้ว
+      </p>
+
+      <p class="email-notice" id="emailNotice"></p>
+
+      <div class="receipt" id="receipt">
+
+        <div class="receipt-title">
+          ใบยืนยันการจองเวลาซ้อม
+        </div>
+
+        <div class="receipt-row">
+          <span class="receipt-label">ชื่อผู้จอง</span>
+          <span class="receipt-value" id="rName"></span>
+        </div>
+
+        <div class="receipt-row">
+          <span class="receipt-label">ฝ่าย</span>
+          <span class="receipt-value" id="rDepartment"></span>
+        </div>
+
+        <div class="receipt-row">
+          <span class="receipt-label">วันที่</span>
+          <span class="receipt-value" id="rDate"></span>
+        </div>
+
+        <div class="receipt-row">
+          <span class="receipt-label">เวลา</span>
+          <span class="receipt-value" id="rTime"></span>
+        </div>
+
+        <div class="receipt-row">
+          <span class="receipt-label">ติดต่อกลับ</span>
+          <span class="receipt-value" id="rContact"></span>
+        </div>
+
+        <div class="receipt-row">
+          <span class="receipt-label">Email</span>
+          <span class="receipt-value" id="rEmail"></span>
+        </div>
+
+        <div class="receipt-row">
+          <span class="receipt-label">สถานะ</span>
+          <span class="receipt-value" id="rStatus">จองแล้ว</span>
+        </div>
+
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="save-btn"
+          id="saveImageBtn"
+        >
+          ↓ Save เป็นรูปภาพ
+        </button>
+
+        <button
+          type="button"
+          class="close-btn"
+          id="closeModalBtn"
+        >
+          ปิด
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const BOOKING_MINUTES = 90;
+
+    const form = document.getElementById('bookingForm');
+    const departmentSelect = document.getElementById('department');
+    const dateInput = document.getElementById('date');
+    const startTimeSelect = document.getElementById('startTime');
+    const endTimeDisplay = document.getElementById('endTimeDisplay');
+    const submitBtn = document.getElementById('submitBtn');
+    const messageBox = document.getElementById('message');
+
+    let displayedMonth = new Date();
+    displayedMonth = new Date(
+      displayedMonth.getFullYear(),
+      displayedMonth.getMonth(),
+      1
+    );
+
+    let selectedDate = toDateKey(new Date());
+    let monthBookings = [];
+
+    //================================================
+    // จัดการวันที่
+    //================================================
+    function toDateKey(date) {
+      return date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0');
+    }
+
+    function parseDateKey(key) {
+      const parts = key.split('-').map(Number);
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[ch]));
+    }
+
+    //================================================
+    // โหลดรายชื่อฝ่ายจาก Google Sheets
+    //================================================
+    function loadDepartments() {
+      google.script.run
+        .withSuccessHandler(data => {
+          departmentSelect.innerHTML =
+            '<option value="">-- กรุณาเลือกฝ่าย --</option>';
+
+          (data || []).forEach(department => {
+            const option = document.createElement('option');
+            option.value = department;
+            option.textContent = department;
+            departmentSelect.appendChild(option);
+          });
+        })
+        .withFailureHandler(error => {
+          showMessage(
+            'ไม่สามารถโหลดรายชื่อฝ่ายได้: ' + error.message,
+            'error'
+          );
+        })
+        .getColumnData('data', 'A');
+    }
+
+    //================================================
+    // สร้างตัวเลือกเวลา
+    //================================================
+    function loadTimes() {
+      startTimeSelect.innerHTML =
+        '<option value="">-- กรุณาเลือกเวลา --</option>';
+
+      // จองครั้งละ 90 นาที และต้องสิ้นสุดไม่เกิน 20:00 น.
+      const availableTimes = [
+        '16:30', '17:00', '17:30', '18:00', '18:30'
+      ];
+
+      availableTimes.forEach(time => {
+        const option = document.createElement('option');
+        option.value = time;
+        option.textContent = time + ' น.';
+        startTimeSelect.appendChild(option);
+      });
+    }
+
+    //================================================
+    // คำนวณเวลาสิ้นสุด
+    //================================================
+    function calculateEndTime() {
+      const startTime = startTimeSelect.value;
+
+      if (!startTime) {
+        endTimeDisplay.textContent = 'กรุณาเลือกเวลาเริ่มต้น';
+        return '';
+      }
+
+      const [hour, minute] = startTime.split(':').map(Number);
+
+      const date = new Date(2000, 0, 1, hour, minute);
+      date.setMinutes(date.getMinutes() + BOOKING_MINUTES);
+
+      const result =
+        String(date.getHours()).padStart(2, '0') + ':' +
+        String(date.getMinutes()).padStart(2, '0');
+
+      endTimeDisplay.textContent = result + ' น.';
+
+      return result;
+    }
+
+    startTimeSelect.addEventListener('change', calculateEndTime);
+
+    //================================================
+    // แสดงข้อความ
+    //================================================
+    function showMessage(text, type) {
+      messageBox.className = 'message ' + type;
+      messageBox.textContent = text;
+    }
+
+    function clearMessage() {
+      messageBox.className = 'message';
+      messageBox.textContent = '';
+    }
+
+    //================================================
+    // โหลดปฏิทิน
+    //================================================
+    function loadCalendar() {
+      const year = displayedMonth.getFullYear();
+      const month = displayedMonth.getMonth() + 1;
+
+      document.getElementById('monthTitle').textContent =
+        displayedMonth.toLocaleDateString('th-TH', {
+          month: 'long',
+          year: 'numeric'
+        });
+
+      document.getElementById('calendarLoading').textContent =
+        'กำลังโหลดปฏิทิน...';
+
+      google.script.run
+        .withSuccessHandler(data => {
+          monthBookings = data || [];
+
+          renderCalendar();
+          renderDayBookings();
+
+          document.getElementById('calendarLoading').textContent = '';
+        })
+        .withFailureHandler(error => {
+          document.getElementById('calendarLoading').textContent =
+            'โหลดปฏิทินไม่สำเร็จ: ' + error.message;
+
+          monthBookings = [];
+
+          renderCalendar();
+          renderDayBookings();
+        })
+        .getBookingsForCalendar(year, month);
+    }
+
+    //================================================
+    // แสดงปฏิทิน
+    //================================================
+    function renderCalendar() {
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+
+      [
+        'อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'
+      ].forEach(label => {
+        const el = document.createElement('div');
+        el.className = 'weekday';
+        el.textContent = label;
+        grid.appendChild(el);
+      });
+
+      const year = displayedMonth.getFullYear();
+      const month = displayedMonth.getMonth();
+
+      const firstDay = new Date(year, month, 1);
+      const start = new Date(
+        year,
+        month,
+        1 - firstDay.getDay()
+      );
+
+      const todayKey = toDateKey(new Date());
+
+      for (let i = 0; i < 42; i++) {
+        const date = new Date(
+          start.getFullYear(),
+          start.getMonth(),
+          start.getDate() + i
+        );
+
+        const key = toDateKey(date);
+
+        const dayBookings = monthBookings.filter(
+          b => b.date === key
+        );
+
+        const activeCount = dayBookings.filter(
+          b => b.status !== 'ยกเลิก'
+        ).length;
+
+        const cancelledCount =
+          dayBookings.length - activeCount;
+
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = 'day';
+
+        if (date.getMonth() !== month) {
+          cell.classList.add('other-month');
+        }
+
+        if (key === todayKey) {
+          cell.classList.add('today');
+        }
+
+        if (key === selectedDate) {
+          cell.classList.add('selected');
+        }
+
+        const number = document.createElement('span');
+        number.className = 'day-number';
+        number.textContent = date.getDate();
+
+        cell.appendChild(number);
+
+        const dots = document.createElement('span');
+        dots.className = 'dots';
+
+        for (let j = 0; j < Math.min(activeCount, 4); j++) {
+          const dot = document.createElement('i');
+          dot.className = 'dot';
+          dots.appendChild(dot);
+        }
+
+        if (activeCount === 0 && cancelledCount > 0) {
+          const dot = document.createElement('i');
+          dot.className = 'dot cancelled';
+          dots.appendChild(dot);
+        }
+
+        cell.appendChild(dots);
+
+        if (activeCount > 0) {
+          const count = document.createElement('small');
+
+          count.style.cssText =
+            'font-size:10px;color:#15803d;line-height:1';
+
+          count.textContent = activeCount + ' จอง';
+
+          cell.appendChild(count);
+        }
+
+        cell.addEventListener('click', () => {
+          selectedDate = key;
+
+          if (date.getMonth() !== displayedMonth.getMonth() ||
+              date.getFullYear() !== displayedMonth.getFullYear()) {
+
+            displayedMonth = new Date(
+              date.getFullYear(),
+              date.getMonth(),
+              1
+            );
+
+            loadCalendar();
+
+          } else {
+            renderCalendar();
+            renderDayBookings();
+          }
+        });
+
+        grid.appendChild(cell);
+      }
+    }
+
+    //================================================
+    // แสดงรายการจองในวันที่เลือก
+    //================================================
+    function renderDayBookings() {
+      const title = document.getElementById('selectedDateTitle');
+      const list = document.getElementById('dayBookings');
+
+      if (!selectedDate) {
+        title.textContent = 'กรุณาเลือกวันที่';
+        list.innerHTML =
+          '<div class="empty">ไม่มีวันที่ที่เลือก</div>';
+        return;
+      }
+
+      const date = parseDateKey(selectedDate);
+
+      title.textContent = date.toLocaleDateString('th-TH', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      const items = monthBookings
+        .filter(b => b.date === selectedDate)
+        .sort((a, b) =>
+          a.startTime.localeCompare(b.startTime)
+        );
+
+      if (!items.length) {
+        list.innerHTML =
+          '<div class="empty">ไม่มีรายการจองในวันนี้</div>';
+        return;
+      }
+
+      list.innerHTML = items.map(item => {
+        const cancelled = item.status === 'ยกเลิก';
+
+        return `
+          <div class="booking-item ${cancelled ? 'cancelled' : ''}">
+            <div class="booking-time">
+              ${escapeHtml(item.startTime)}–${escapeHtml(item.endTime)} น.
+            </div>
+
+            <div class="booking-person">
+              ${escapeHtml(item.name)}
+            </div>
+
+            <div class="booking-meta">
+              ${escapeHtml(item.department)} · ${escapeHtml(item.status)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    //================================================
+    // เปลี่ยนเดือน
+    //================================================
+    document.getElementById('prevMonth')
+      .addEventListener('click', () => {
+
+        displayedMonth = new Date(
+          displayedMonth.getFullYear(),
+          displayedMonth.getMonth() - 1,
+          1
+        );
+
+        selectedDate = toDateKey(displayedMonth);
+
+        loadCalendar();
+      });
+
+    document.getElementById('nextMonth')
+      .addEventListener('click', () => {
+
+        displayedMonth = new Date(
+          displayedMonth.getFullYear(),
+          displayedMonth.getMonth() + 1,
+          1
+        );
+
+        selectedDate = toDateKey(displayedMonth);
+
+        loadCalendar();
+      });
+
+    //================================================
+    // แสดง Pop-up จองสำเร็จ
+    //================================================
+    function showSuccessModal(booking, emailSent) {
+      const date = parseDateKey(booking.date);
+
+      document.getElementById('rName').textContent =
+        booking.name || '';
+
+      document.getElementById('rDepartment').textContent =
+        booking.department || '';
+
+      document.getElementById('rDate').textContent =
+        date.toLocaleDateString('th-TH', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+
+      document.getElementById('rTime').textContent =
+        booking.startTime + '–' + booking.endTime + ' น.';
+
+      document.getElementById('rContact').textContent =
+        booking.contact || '';
+
+      document.getElementById('rEmail').textContent =
+        booking.email || '';
+
+      document.getElementById('rStatus').textContent =
+        booking.status || 'จองแล้ว';
+
+      const emailNotice = document.getElementById('emailNotice');
+
+      if (emailSent) {
+        emailNotice.textContent =
+          'ส่งอีเมลแจ้งเตือนไปยังผู้ดูแลระบบแล้ว';
+
+        emailNotice.className = 'email-notice';
+      } else {
+        emailNotice.textContent =
+          'บันทึกการจองสำเร็จ แต่ส่งอีเมลแจ้งเตือนไม่สำเร็จ';
+
+        emailNotice.className = 'email-notice failed';
+      }
+
+      document.getElementById('successModal')
+        .classList.add('show');
+    }
+
+    //================================================
+    // ปิด Pop-up
+    //================================================
+    function closeSuccessModal() {
+      document.getElementById('successModal')
+        .classList.remove('show');
+    }
+
+    document.getElementById('closeModalBtn')
+      .addEventListener('click', closeSuccessModal);
+
+    document.getElementById('successModal')
+      .addEventListener('click', event => {
+        if (event.target.id === 'successModal') {
+          closeSuccessModal();
+        }
+      });
+
+    //================================================
+    // Save ใบยืนยันเป็นรูปภาพ PNG
+    //================================================
+    document.getElementById('saveImageBtn')
+      .addEventListener('click', () => {
+
+        const booking = {
+          name: document.getElementById('rName').textContent,
+          department: document.getElementById('rDepartment').textContent,
+          date: document.getElementById('rDate').textContent,
+          time: document.getElementById('rTime').textContent,
+          contact: document.getElementById('rContact').textContent,
+          email: document.getElementById('rEmail').textContent,
+          status: document.getElementById('rStatus').textContent
+        };
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const width = 900;
+        const padding = 65;
+        const lineHeight = 64;
+
+        const rows = [
+          ['ชื่อผู้จอง', booking.name],
+          ['ฝ่าย', booking.department],
+          ['วันที่', booking.date],
+          ['เวลา', booking.time],
+          ['ติดต่อกลับ', booking.contact],
+          ['Email', booking.email],
+          ['สถานะ', booking.status]
+        ];
+
+        canvas.width = width;
+        canvas.height = 330 + rows.length * lineHeight;
+
+        ctx.fillStyle = '#f0fdf4';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Card
+        const x = 35;
+        const y = 30;
+        const w = width - 70;
+        const h = canvas.height - 60;
+        const radius = 24;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + w, y, x + w, y + h, radius);
+        ctx.arcTo(x + w, y + h, x, y + h, radius);
+        ctx.arcTo(x, y + h, x, y, radius);
+        ctx.arcTo(x, y, x + w, y, radius);
+
+        ctx.closePath();
+        ctx.fill();
+
+        // Success icon
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#16a34a';
+
+        ctx.beginPath();
+        ctx.arc(width / 2, 105, 36, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 43px Sarabun, sans-serif';
+        ctx.fillText('✓', width / 2, 120);
+
+        // Heading
+        ctx.fillStyle = '#15803d';
+        ctx.font = 'bold 38px Sarabun, sans-serif';
+        ctx.fillText('จองสำเร็จ!', width / 2, 185);
+
+        ctx.fillStyle = '#15803d';
+        ctx.font = 'bold 29px Sarabun, sans-serif';
+        ctx.fillText(
+          'ใบยืนยันการจองเวลาซ้อม',
+          width / 2,
+          235
+        );
+
+        // Booking details
+        let rowY = 300;
+
+        rows.forEach(([label, value]) => {
+
+          ctx.strokeStyle = '#dcfce7';
+          ctx.lineWidth = 1;
+
+          ctx.beginPath();
+          ctx.moveTo(padding, rowY + 20);
+          ctx.lineTo(width - padding, rowY + 20);
+          ctx.stroke();
+
+          ctx.fillStyle = '#64748b';
+          ctx.font = '26px Sarabun, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(label, padding, rowY);
+
+          ctx.fillStyle = '#1e293b';
+          ctx.font = 'bold 26px Sarabun, sans-serif';
+
+          const maxWidth = 500;
+          const text = String(value || '-');
+
+          ctx.textAlign = 'right';
+          ctx.fillText(
+            text,
+            width - padding,
+            rowY,
+            maxWidth
+          );
+
+          rowY += lineHeight;
+        });
+
+        // Footer
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '20px Sarabun, sans-serif';
+
+        ctx.fillText(
+          'กรุณาเก็บภาพนี้ไว้เป็นหลักฐานการจอง',
+          width / 2,
+          canvas.height - 55
+        );
+
+        // สร้างไฟล์ PNG; iPhone/iPad เปิดภาพในแท็บใหม่เพื่อกดค้างบันทึกได้
+        const imageUrl = canvas.toDataURL('image/png');
+        const fileName = 'booking-confirmation-' +
+          new Date().toISOString().slice(0, 10) + '.png';
+        const isAppleTouch = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+        if (isAppleTouch) {
+          const imageWindow = window.open('', '_blank');
+          if (imageWindow) {
+            imageWindow.document.write(
+              '<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>บันทึกใบยืนยัน</title></head>' +
+              '<body style="margin:0;padding:12px;text-align:center;font-family:sans-serif;background:#f0fdf4">' +
+              '<p>แตะค้างที่รูปภาพ แล้วเลือก “บันทึกไปยังรูปภาพ” หรือ “Save Image”</p>' +
+              '<img alt="ใบยืนยันการจอง" src="' + imageUrl + '" style="max-width:100%;height:auto">' +
+              '</body></html>'
+            );
+            imageWindow.document.close();
+          } else {
+            showMessage('กรุณาอนุญาต Pop-up เพื่อบันทึกรูปภาพ', 'error');
+          }
+        } else {
+          const link = document.createElement('a');
+          link.download = fileName;
+          link.href = imageUrl;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+      });
+
+    //================================================
+    // ส่งข้อมูลการจอง
+    //================================================
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+
+      if (!form.reportValidity()) return;
+
+      const bookingData = {
+        name: document.getElementById('name').value.trim(),
+        department: departmentSelect.value,
+        contact: document.getElementById('contact').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        date: dateInput.value,
+        startTime: startTimeSelect.value
+      };
+
+      if (!bookingData.date || !bookingData.startTime) {
+        showMessage('กรุณาเลือกวันที่และเวลา', 'error');
+        return;
+      }
+
+      // เก็บเวลาสิ้นสุดไว้ก่อน reset form
+      const calculatedEndTime = calculateEndTime();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึกข้อมูล...';
+
+      showMessage(
+        'กำลังดำเนินการจอง กรุณารอสักครู่',
+        'loading'
+      );
+
+      google.script.run
+
+        .withSuccessHandler(response => {
+
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'ยืนยันการจอง';
+
+          if (response && response.ok) {
+
+            clearMessage();
+
+            const savedBooking = response.booking || {
+              ...bookingData,
+              endTime: calculatedEndTime,
+              status: 'จองแล้ว'
+            };
+
+            // ล้างฟอร์ม
+            form.reset();
+            calculateEndTime();
+
+            // แสดง Pop-up
+            showSuccessModal(
+              savedBooking,
+              response.emailSent === true
+            );
+
+            // เลื่อนไปยังเดือนที่มีการจอง
+            selectedDate = bookingData.date;
+
+            const selected = parseDateKey(selectedDate);
+
+            displayedMonth = new Date(
+              selected.getFullYear(),
+              selected.getMonth(),
+              1
+            );
+
+            // โหลดปฏิทินใหม่
+            loadCalendar();
+
+          } else {
+
+            showMessage(
+              response
+                ? response.message
+                : 'ไม่สามารถบันทึกข้อมูลได้',
+              'error'
+            );
+
+          }
+        })
+
+        .withFailureHandler(error => {
+
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'ยืนยันการจอง';
+
+          showMessage(
+            'เกิดข้อผิดพลาด: ' + error.message,
+            'error'
+          );
+
+        })
+
+        .saveBooking(bookingData);
+    });
+
+    //================================================
+    // เริ่มต้นระบบ
+    //================================================
+    window.addEventListener('load', () => {
+      loadDepartments();
+      loadTimes();
+      calculateEndTime();
+      loadCalendar();
+    });
+
+  </script>
+</body>
+</html>
